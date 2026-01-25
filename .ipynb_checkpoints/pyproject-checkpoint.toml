@@ -1,0 +1,21 @@
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum_error_corrections"
+version = "0.1.0"
+description = "Quantum Error Correction (QEC) using Python and NumPy"
+authors = [
+  {name = "Abiy Zelalem Tegegne"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "numpy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

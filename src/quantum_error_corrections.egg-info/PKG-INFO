@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: quantum_error_corrections
+Version: 0.1.0
+Summary: Quantum Error Correction (QEC) using Python and NumPy
+Author: Abiy Zelalem Tegegne
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+
+
+
+
