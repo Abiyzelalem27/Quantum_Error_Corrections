@@ -7,15 +7,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quantum_error_corrections"
 version = "0.1.0"
-description = "Quantum Error Correction (QEC) using Python and NumPy"
-authors = [
-  {name = "Abiy Zelalem Tegegne"}
-]
-readme = "README.md"
-requires-python = ">=3.8"
-dependencies = [
-  "numpy",
-]
+description = "Quantum gates, noise models, and quantum error correction tools"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
