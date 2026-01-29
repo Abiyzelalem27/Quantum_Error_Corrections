@@ -19,30 +19,78 @@ from .operator import (
 )
 
 # -----------------------
-# Noise channels (Kraus)
+# Noise channels + tools
 # -----------------------
 from .channel import (
+    # Kraus application
     apply_kraus,
+
+    # Basic Kraus channels
     bit_flip_kraus,
     phase_flip_kraus,
     depolarizing_kraus,
     amplitude_damping_kraus,
     phase_damping_kraus,
+
+    # ✅ Added important missing functions
+    ket0, ket1,
+    dm,
+    random_pure_state,
+
+    fidelity_pure_rho,
+    sample_min_fidelity,
+
+    pauli_kraus_channel,
+
+    # Q3 channels (bit-flip code fidelity)
+    E1_rho,
+    E3_effective_rho,
+    min_fidelity_bitflip_channel,
+    min_fidelity_three_qubit_code,
+    improvement_condition,
+
 )
 
 __all__ = [
-    # operators
-    "rhoToBlochVec", "I", "X", "Y", "Z", "H", "S", "T", "CNOT",
+    # -----------------------
+    # Operators
+    # -----------------------
+    "rhoToBlochVec",
+    "I", "X", "Y", "Z", "H", "S", "T", "CNOT",
     "P0", "P1",
     "rotation_gate",
     "U_N_qubits", "U_one_gate", "U_two_gates",
     "rho", "evolve", "controlled_gate", "projectors",
 
-    # channels
+    # -----------------------
+    # Channels
+    # -----------------------
     "apply_kraus",
     "bit_flip_kraus",
     "phase_flip_kraus",
     "depolarizing_kraus",
     "amplitude_damping_kraus",
     "phase_damping_kraus",
+    "improvement_condition",
+
+
+    # -----------------------
+    # ✅ Added utilities / states
+    # -----------------------
+    "ket0", "ket1",
+    "dm",
+    "random_pure_state",
+
+    "fidelity_pure_rho",
+    "sample_min_fidelity",
+
+    "pauli_kraus_channel",
+
+    # -----------------------
+    # ✅ Q3 helper channels
+    # -----------------------
+    "E1_rho",
+    "E3_effective_rho",
+    "min_fidelity_bitflip_channel",
+    "min_fidelity_three_qubit_code",
 ]
