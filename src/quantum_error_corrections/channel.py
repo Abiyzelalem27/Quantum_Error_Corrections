@@ -131,7 +131,6 @@ def phase_damping_kraus(lmbda):
     
 
 
-import numpy as np
 
 def depolarizing_kraus(p):
     """
