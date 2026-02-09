@@ -271,3 +271,93 @@ def improvement_condition():
     """
     return "Error correction improves fidelity when p < 1/2"
 
+def normalize(v):
+    n = np.linalg.norm(v)
+    return v / n
+
+def random_qubit_state():
+    # random complex 2-vector
+    v = (np.random.randn(2) + 1j*np.random.randn(2)).astype(complex)
+    return normalize(v)
+
+def encode(psi):  # psi is (2,) normalized
+    # alpha|000> + beta|111>
+    alpha, beta = psi[0], psi[1]
+    out = np.zeros(8, dtype=complex)
+    out[0] = alpha         # |000>
+    out[7] = beta          # |111>
+    return out
+
+
+def majority_vote_correct(state3):
+    # project to closest codeword by majority of bits:
+    # basis |000> and |111> only; we "collapse" amplitude groups
+    alpha_eff = 0+0j
+    beta_eff = 0+0j
+    for idx, amp in enumerate(state3):
+        bits = [(idx >> 2) & 1, (idx >> 1) & 1, idx & 1]
+        ones = sum(bits)
+        if ones <= 1:
+            alpha_eff += amp   # treat as |000> component after correction
+        else:
+            beta_eff += amp    # treat as |111> component after correction
+    out = np.zeros(8, dtype=complex)
+    out[0] = alpha_eff
+    out[7] = beta_eff
+    return out
+
+def decode_to_single_qubit(state3):
+    # since corrected state is alpha|000> + beta|111>, decode to (alpha, beta)
+    return np.array([state3[0], state3[7]], dtype=complex)
+
+def fidelity(psi, rho_or_pure):
+    # psi is pure state vector (2,)
+    # rho_or_pure can be a pure vector (2,) or density (2,2)
+    if rho_or_pure.ndim == 1:
+        phi = rho_or_pure
+        return abs(np.vdot(psi, phi))**2
+    else:
+        rho = rho_or_pure
+        return np.real(np.vdot(psi, rho @ psi))
+
+def monte_carlo_fidelity(p, trials=20000):
+    F_vals = []
+    for _ in range(trials):
+        psi = random_qubit_state()
+        enc = encode(psi)
+        noisy = apply_bitflips(enc, p)
+        corr = majority_vote_correct(noisy)
+        dec = decode_to_single_qubit(corr)
+        # normalize decoded (because our correction step sums amplitudes)
+        dec = normalize(dec)
+        F_vals.append(fidelity(psi, dec))
+    return float(np.mean(F_vals))
+
+def pauli_string(n, ops):
+    """
+    n   : total number of qubits
+    ops : dict {site: 'X','Y','Z'}
+          site is 1-indexed
+    """
+    pauli_map = {
+        'I': I,
+        'X': X,
+        'Y': Y,
+        'Z': Z
+    }
+
+    result = 1
+    for i in range(1, n + 1):
+        if i in ops:
+            result = np.kron(result, pauli_map[ops[i]])
+        else:
+            result = np.kron(result, I)
+
+    return result
+
+def apply_bitflips(state, p):
+    noisy = state.copy()
+    for i in range(3):  # 3-qubit repetition
+        if np.random.rand() < p:
+            noisy = apply_X(noisy, i)  # your X-on-qubit-i function
+    return noisy

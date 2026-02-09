@@ -31,16 +31,28 @@ from .channel import (
     depolarizing_kraus,
     amplitude_damping_kraus,
     phase_damping_kraus,
+    
 
     # ✅ Added important missing functions
     ket0, ket1,
     dm,
     random_pure_state,
 
+    fidelity,
     fidelity_pure_rho,
     sample_min_fidelity,
 
     pauli_kraus_channel,
+    normalize,
+    random_qubit_state,
+    encode,
+    majority_vote_correct,
+    decode_to_single_qubit,
+    monte_carlo_fidelity,
+    pauli_string,
+    apply_bitflips,
+    
+    
 
     # Q3 channels (bit-flip code fidelity)
     E1_rho,
@@ -66,6 +78,15 @@ __all__ = [
     # Channels
     # -----------------------
     "apply_kraus",
+    "fidelity",
+    "apply_bitflips",
+    "pauli_string",
+    "monte_carlo_fidelity",
+    "normalize",
+    "random_qubit_state",
+    "encode",
+    "majority_vote_correct",
+    "decode_to_single_qubit",
     "bit_flip_kraus",
     "phase_flip_kraus",
     "depolarizing_kraus",
