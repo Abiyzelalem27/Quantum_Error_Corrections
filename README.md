@@ -1,8 +1,6 @@
 <<<<<<< HEAD
 
-
-=======
-# Quantum Error Corrections (QEC) using Python + NumPy
+# Quantum Error Corrections (QEC) using Python 
 
 This repository contains a **step-by-step educational implementation** of core ideas in  
 **Quantum Error Correction (QEC)** using **Python **.
@@ -12,7 +10,6 @@ QEC provides methods to **detect and correct errors** while preserving the quant
 
 This repository is mainly prepared for **learning + internship portfolio** purposes.
 
----
 
 ## Files
 
@@ -59,7 +56,7 @@ Quantum error correction codes and logic:
 - Shor 9-qubit code
 - correction rules
 
-#### `utils/`
+#### `utils/` 
 Helper functions:
 - tensor products
 - fidelity calculation

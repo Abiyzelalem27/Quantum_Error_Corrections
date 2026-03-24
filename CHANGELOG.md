@@ -2,21 +2,25 @@
 
 # Changelog
 
-All notable changes to this project will be documented in this file.
-The package updated every time 
----
+All notable changes to this project will be documented in this file.  
+The package is updated every time new features, fixes, or simulations are added.
+
 
 ## [2026-01-28]
 ### Added
 - Implemented 3-qubit bit-flip code.
-- Implemented 3-qubit phase-flip code:
-- Implemented depolarizing channel and Monte Carlo.
-- Implemented Transversal logical gates
-- Added amplitude damping and phase damping channel with fidelity plots.
+- Implemented 3-qubit phase-flip code.
+- Implemented transversal logical gates.
+- Added amplitude damping and phase damping channels.
 
-  ### 2/4/2026
-- ### update
-- added error corrections code and verify the bit and Phase file code in the syndrom measurement.
-- add majority vote for for bit flip code.
-- Simulation minimum fidelity for single-qubit bit-flip channel.
-  
+
+## [2026-02-04]
+### Updated
+- Added error correction code and verified bit-flip and phase-flip.
+
+## [2026-03-24] 
+### Updated
+ -aded Simulating_noisy
+- Updated notebooks for depolarizing, amplitude damping, and phase damping channels with fidelity plots.
+    
+    
