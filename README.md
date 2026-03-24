@@ -1,6 +1,6 @@
 <<<<<<< HEAD
 
-# Quantum Error Corrections (QEC) using Python 
+# Quantum Error Corrections (QEC) 
 
 This repository contains a **step-by-step educational implementation** of core ideas in  
 **Quantum Error Correction (QEC)** using **Python **.
