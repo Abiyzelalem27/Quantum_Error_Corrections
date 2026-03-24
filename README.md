@@ -3,7 +3,7 @@
 # Quantum Error Corrections (QEC) 
 
 This repository contains a **step-by-step educational implementation** of core ideas in  
-**Quantum Error Correction (QEC)** using **Python **.
+
 
 Quantum computers are very sensitive to noise (decoherence, imperfect gates).  
 QEC provides methods to **detect and correct errors** while preserving the quantum information.
