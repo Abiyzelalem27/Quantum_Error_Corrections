@@ -10,7 +10,6 @@ The package is updated every time new features, fixes, or simulations are added.
 ### Added
 - Implemented 3-qubit bit-flip code.
 - Implemented 3-qubit phase-flip code.
-- Implemented transversal logical gates.
 - Added amplitude damping and phase damping channels.
 
 
@@ -20,7 +19,9 @@ The package is updated every time new features, fixes, or simulations are added.
 
 ## [2026-03-24] 
 ### Updated
- -aded Simulating_noisy
+- added Simulating_noisy
 - Updated notebooks for depolarizing, amplitude damping, and phase damping channels with fidelity plots.
-    
-    
+## [2026-03-25] 
+### Updated
+- added phase flip errors
+- add repetition code. 
