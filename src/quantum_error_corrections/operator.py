@@ -628,8 +628,7 @@ def deutsch_jozsa_error4(n, f, theta, target_qubit, axis):
     return state
 
 def encode_3_qubit_bit_flip_code(psi):
-    """
-    Encode a single qubit state into the 3-qubit bit-flip code.
+    """Encode a single qubit state into the 3-qubit bit-flip code.
     """
     psi = np.kron(psi, np.kron(ket0(), ket0()))
     CNOT12 = controlled_gate(X, 0, 1, 3)
