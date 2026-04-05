@@ -956,29 +956,7 @@ def shor_logical_one():
     """Logical |1⟩_L"""
     return np.kron(np.kron(ghz_minus(), ghz_minus()), ghz_minus())
 
-def apply_z_error(state, qubit_index, num_qubits):
-    """
-    Apply a single-qubit phase-flip (Z) error on a given qubit of a multi-qubit state.
-
-    Parameters
-    ----------
-    state : np.ndarray
-        The input multi-qubit state vector (e.g., Shor logical state)
-    qubit_index : int
-        The 0-based index of the qubit to apply the Z error
-    num_qubits : int
-        Total number of qubits in the system (default 9 for Shor code)
-
-    Returns
-    -------
-    np.ndarray
-        The new state vector after applying the Z error
-    """
-    op = np.array([[1]])  # start with 1x1 identity
-    for i in range(num_qubits):
-        op = np.kron(op, Z) if i == qubit_index else np.kron(op, I)
-    return op @ state
-
+    
 def phase_stabilizer_1():
     """
     First phase stabilizer for the Shor code. This operator is X1 X2 X3 X4 X5 X6 ⊗ I7 I8 I9 
@@ -1036,3 +1014,205 @@ Returns
     """
     val = np.vdot(state, stabilizer @ state)  # <ψ|S|ψ>
     return int(np.sign(np.real(val)))
+
+
+def apply_error(state, error, index, num_qubits):
+    """
+    Apply a single-qubit Pauli error (X, Y, Z) or identity on a multi-qubit state.
+    
+    error can be a string ('X','Y','Z','I') or a 2x2 matrix (np.ndarray)
+    """
+    if isinstance(error, str) and error == 'I':
+        return state
+    elif isinstance(error, str):
+        pauli_dict = {'X': X, 'Y': Y, 'Z': Z}
+        error = pauli_dict[error]
+    
+    op = np.array([[1]])
+    for i in range(num_qubits):
+        if i == index:
+            op = np.kron(op, error)
+        else:
+            op = np.kron(op, I)
+    return op @ state 
+
+def bit_stabilizer_1a():
+    """
+    First bit-flip stabilizer for Block 1 (qubits 1-3).
+    Operator: Z1 Z2 ⊗ I3 I4 I5 I6 I7 I8 I9
+    Detects X errors on qubits 1 and 2.
+    """
+    ops = [Z, Z, I, I, I, I, I, I, I]
+    return U_N_qubits(ops)
+
+
+def bit_stabilizer_1b():
+    """
+    Second bit-flip stabilizer for Block 1 (qubits 1-3).
+    Operator: I1 Z2 Z3 ⊗ I4 I5 I6 I7 I8 I9
+    Detects X errors on qubits 2 and 3.
+    """
+    ops = [I, Z, Z, I, I, I, I, I, I]
+    return U_N_qubits(ops)
+
+
+def bit_stabilizer_2a():
+    """
+    First bit-flip stabilizer for Block 2 (qubits 4-6).
+    Operator: I1 I2 I3 Z4 Z5 I6 I7 I8 I9
+    Detects X errors on qubits 4 and 5.
+    """
+    ops = [I, I, I, Z, Z, I, I, I, I]
+    return U_N_qubits(ops)
+
+
+def bit_stabilizer_2b():
+    """
+    Second bit-flip stabilizer for Block 2 (qubits 4-6).
+    Operator: I1 I2 I3 I4 Z5 Z6 I7 I8 I9
+    Detects X errors on qubits 5 and 6.
+    """
+    ops = [I, I, I, I, Z, Z, I, I, I]
+    return U_N_qubits(ops)
+
+
+def bit_stabilizer_3a():
+    """
+    First bit-flip stabilizer for Block 3 (qubits 7-9).
+    Operator: I1 I2 I3 I4 I5 I6 Z7 Z8 I9
+    Detects X errors on qubits 7 and 8.
+    """
+    ops = [I, I, I, I, I, I, Z, Z, I]
+    return U_N_qubits(ops)
+
+
+def bit_stabilizer_3b():
+    """
+    Second bit-flip stabilizer for Block 3 (qubits 7-9).
+    Operator: I1 I2 I3 I4 I5 I6 I7 Z8 Z9
+    Detects X errors on qubits 8 and 9.
+    """
+    ops = [I, I, I, I, I, I, I, Z, Z]
+    return U_N_qubits(ops)
+
+def correct_errors(state):
+    """ 
+    Detects and corrects single-qubit errors in a 9-qubit Shor code logical state.
+    This function uses the **Shor code stabilizers** to identify and correct 
+    **single X (bit-flip) or Z (phase-flip) errors**. 
+
+    Bit-flip correction:
+    - The 9 qubits are divided into 3 blocks of 3 qubits each:
+        - Block 1: qubits 0,1,2
+        - Block 2: qubits 3,4,5
+        - Block 3: qubits 6,7,8
+    - Each block has 2 bit-flip stabilizers (Z operators):
+        - 1a, 1b for block 1
+        - 2a, 2b for block 2
+        - 3a, 3b for block 3
+    - Measuring these stabilizers (+1/-1) allows us to determine **which qubit in a block has flipped** 
+      and apply the corrective X operation.
+
+    Phase-flip correction:
+    - Two phase-flip stabilizers (X operators) detect Z errors across blocks:
+        - Phase stabilizer 1: checks blocks 1-2
+        - Phase stabilizer 2: checks blocks 2-3
+    - Measuring these stabilizers identifies the **block containing the phase-flip**, 
+      and a Z operation is applied to the first qubit of the affected block.
+
+    Parameters
+    ----------
+    state : np.ndarray
+        The 9-qubit logical state (either |0>_L or |1>_L) possibly affected by a single X or Z error.
+
+    Returns
+    -------
+    np.ndarray
+        The corrected 9-qubit state after applying the appropriate X or Z correction.
+
+    Notes
+    -----
+    - This function assumes **only a single error occurs**. It cannot correct multiple simultaneous errors.
+    - The Shor code protects against both bit-flip and phase-flip errors independently.
+    - Uses `detect_errors()` internally to measure stabilizer outcomes.
+    """
+    
+    bit_results, phase_results = detect_errors(state)
+
+    # Bit-flip correction
+    # Block 1 (q0,q1,q2)
+    if bit_results[0] == -1 and bit_results[1] == +1:
+        state = apply_error(state, 'X', 0, 9)  # q0
+    elif bit_results[0] == -1 and bit_results[1] == -1:
+        state = apply_error(state, 'X', 1, 9)  # q1
+    elif bit_results[0] == +1 and bit_results[1] == -1:
+        state = apply_error(state, 'X', 2, 9)  # q2
+
+    # Block 2 (q3,q4,q5)
+    if bit_results[2] == -1 and bit_results[3] == +1:
+        state = apply_error(state, 'X', 3, 9)  # q3
+    elif bit_results[2] == -1 and bit_results[3] == -1:
+        state = apply_error(state, 'X', 4, 9)  # q4
+    elif bit_results[2] == +1 and bit_results[3] == -1:
+        state = apply_error(state, 'X', 5, 9)  # q5
+
+    # Block 3 (q6,q7,q8)
+    if bit_results[4] == -1 and bit_results[5] == +1:
+        state = apply_error(state, 'X', 6, 9)  # q6
+    elif bit_results[4] == -1 and bit_results[5] == -1:
+        state = apply_error(state, 'X', 7, 9)  # q7
+    elif bit_results[4] == +1 and bit_results[5] == -1:
+        state = apply_error(state, 'X', 8, 9)  # q8
+
+    # Phase-flip correction
+    # Phase stabilizers (2 of them: S1, S2)
+    if phase_results[0] == -1 and phase_results[1] == +1:
+        state = apply_error(state, 'Z', 0, 9)  # Block 1 phase error
+    elif phase_results[0] == -1 and phase_results[1] == -1:
+        state = apply_error(state, 'Z', 3, 9)  # Block 2 phase error
+    elif phase_results[0] == +1 and phase_results[1] == -1:
+        state = apply_error(state, 'Z', 6, 9)  # Block 3 phase error
+    return state
+
+def detect_errors(state):
+    """
+    Measure Shor code stabilizers to detect single-qubit errors.
+
+    This function returns the outcomes of **bit-flip (X) and phase-flip (Z) stabilizers** 
+    for a 9-qubit logical state.
+
+    Bit-flip stabilizers:
+    - There are 6 stabilizers in total (2 per block of 3 qubits):
+        - Block 1: qubits 0,1,2 → stabilizers 1a, 1b
+        - Block 2: qubits 3,4,5 → stabilizers 2a, 2b
+        - Block 3: qubits 6,7,8 → stabilizers 3a, 3b
+    - Measuring these stabilizers (+1/-1) allows detection of **which qubit in a block has undergone a bit-flip (X) error**.
+
+    Phase-flip stabilizers:
+    - There are 2 stabilizers that span multiple blocks:
+        - Phase stabilizer 1: checks blocks 1 and 2
+        - Phase stabilizer 2: checks blocks 2 and 3
+    - Measuring these stabilizers identifies **which block contains a phase-flip (Z) error**.
+
+    Parameters
+    ----------
+    state : np.ndarray
+        The 9-qubit logical state (|0>_L or |1>_L) possibly affected by a single X or Z error.
+
+    Returns
+    -------
+    tuple of lists
+        - bit_results : list of 6 elements (+1/-1 outcomes for bit-flip stabilizers)
+        - phase_results : list of 2 elements (+1/-1 outcomes for phase-flip stabilizers)
+
+    Notes
+    -----
+    - Assumes at most a **single-qubit error**.
+    - Uses `measure_stabilizer()` to evaluate each stabilizer.
+    """
+    bit_results = [1 if np.isclose(measure_stabilizer(state,s), 1) else -1 
+                   for s in bit_stabilizers]
+    phase_results = [1 if np.isclose(measure_stabilizer(state,s), 1) else -1 
+                     for s in phase_stabilizers]
+    return bit_results, phase_results  
+
