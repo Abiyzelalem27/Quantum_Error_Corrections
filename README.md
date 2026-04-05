@@ -1,7 +1,5 @@
 
 
-<<<<<<< HEAD
-
 # Quantum Error Corrections (QEC) 
 
 This repository contains a **step-by-step educational implementation** of core ideas in  
@@ -62,5 +60,5 @@ Quantum error correction codes and logic:
 Helper functions:
 - tensor products
 - fidelity calculation
->>>>>>> a0a12ab22491dbfeb0365631d7477bac777247f3
+
 
