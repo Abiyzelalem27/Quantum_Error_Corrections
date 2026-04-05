@@ -628,8 +628,7 @@ def deutsch_jozsa_error4(n, f, theta, target_qubit, axis):
     return state
 
 def encode_3_qubit_bit_flip_code(psi):
-    """
-    Encode a single qubit state into the 3-qubit bit-flip code.
+    """Encode a single qubit state into the 3-qubit bit-flip code.
     """
     psi = np.kron(psi, np.kron(ket0(), ket0()))
     CNOT12 = controlled_gate(X, 0, 1, 3)
@@ -910,5 +909,130 @@ def buildSparseCRk(n, ic, it, k, inverse=False):
     P1ic = buildSparseGateSingle(n, ic, P1)
     Rt = buildSparseGateSingle(n, it, R)
     return P0ic + P1ic @ Rt 
+    
+def three_qubit_zero():
+    """Construct the three-qubit |000⟩ state
+    
+    Returns
+    -------
+    numpy.ndarray
+        8-dimensional vector representing |000⟩
+    """
+    return np.kron(np.kron(ket0(), ket0()), ket0())
 
 
+def three_qubit_one():
+    """Construct the three-qubit |111⟩ state
+    
+    Returns 
+    ------- 
+    numpy.ndarray
+        8-dimensional vector representing |111⟩
+    """
+    return np.kron(np.kron(ket1(), ket1()), ket1())
+
+
+
+# GHZ Block
+def ghz_plus():
+    """Construct GHZ state (|000⟩ + |111⟩)/√2"""
+    zero3 = three_qubit_zero()
+    one3  = three_qubit_one()
+    return (zero3 + one3)/np.sqrt(2)
+
+def ghz_minus():
+    """Construct GHZ state (|000⟩ - |111⟩)/√2"""
+    zero3 = three_qubit_zero()
+    one3  = three_qubit_one()
+    return (zero3 - one3)/np.sqrt(2) 
+
+# Logical Shor States
+def shor_logical_zero():
+    """Logical |0⟩_L"""
+    ghz = ghz_plus()
+    return np.kron(np.kron(ghz_plus(), ghz_plus()), ghz_plus()) 
+
+def shor_logical_one():
+    """Logical |1⟩_L"""
+    return np.kron(np.kron(ghz_minus(), ghz_minus()), ghz_minus())
+
+def apply_z_error(state, qubit_index, num_qubits):
+    """
+    Apply a single-qubit phase-flip (Z) error on a given qubit of a multi-qubit state.
+
+    Parameters
+    ----------
+    state : np.ndarray
+        The input multi-qubit state vector (e.g., Shor logical state)
+    qubit_index : int
+        The 0-based index of the qubit to apply the Z error
+    num_qubits : int
+        Total number of qubits in the system (default 9 for Shor code)
+
+    Returns
+    -------
+    np.ndarray
+        The new state vector after applying the Z error
+    """
+    op = np.array([[1]])  # start with 1x1 identity
+    for i in range(num_qubits):
+        op = np.kron(op, Z) if i == qubit_index else np.kron(op, I)
+    return op @ state
+
+def phase_stabilizer_1():
+    """
+    First phase stabilizer for the Shor code. This operator is X1 X2 X3 X4 X5 X6 ⊗ I7 I8 I9 
+    (Pauli-X on qubits 1-6, identity on 7-9) It is used to **detect phase-flip errors (Z errors) 
+    in the first two blocks** of the Shor code.
+
+    How to read results:
+    - Measuring this stabilizer on a state gives +1 if no phase-flip error is detected in blocks 1-2
+    - Gives -1 if a phase-flip error occurred in these qubits
+
+    Returns
+    -------
+    np.ndarray
+        9-qubit operator representing the first phase stabilizer
+    """
+    ops = [X, X, X, X, X, X, I, I, I]  # Apply X to qubits 1-6, I to qubits 7-9
+    return U_N_qubits(ops) 
+    
+def phase_stabilizer_2():
+    """
+    Second phase stabilizer for the Shor code.
+    This operator is I1 I2 I3 X4 X5 X6 X7 X8 X9 
+    (Pauli-X on qubits 4-9, identity on qubits 1-3).
+    
+    Purpose:
+    - Detects **phase-flip errors (Z errors) in the last two blocks** of the Shor code (qubits 4-9).
+    
+    How to read results:
+    - Measuring this stabilizer on a state gives +1 if no phase-flip error is detected in blocks 2-3
+    - Gives -1 if a phase-flip error occurred in these qubits
+    
+    Returns
+    -------
+    np.ndarray
+        9-qubit operator representing the second phase stabilizer
+    """
+    ops = [I, I, I, X, X, X, X, X, X]  # Apply X to qubits 4-9, I to qubits 1-3
+    return U_N_qubits(ops) 
+
+def measure_stabilizer(state, stabilizer): 
+    """
+    Measure a stabilizer on a given state.
+
+    Parameters
+    ----------
+    state : np.ndarray
+        The multi-qubit state vector (e.g., Shor logical state)
+    stabilizer : np.ndarray
+        Multi-qubit stabilizer operator
+Returns
+    -------
+    int
+        +1 if the state is in +1 eigenspace
+        -1 if the state is in -1 eigenspace  
+    """
+    val = np.vdot(state, stabilizer @ state)  # <ψ|S|ψ>
+    return int(np.sign(np.real(val)))
