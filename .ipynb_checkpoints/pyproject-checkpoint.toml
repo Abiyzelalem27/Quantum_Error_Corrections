@@ -7,12 +7,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quantum_error_corrections"
 version = "0.1.0"
-description = "uantum error correction tools" 
+description = "quantum error correction tools" 
 requires-python = ">=3.10"
-dependencies = ["numpy"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "jupyter",
+    "qutip",
+]
+
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+ 
+
