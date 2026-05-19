@@ -1,5 +1,11 @@
 
 
+
+[![CI](https://github.com/Abiyzelalem27/quantum_error_corrections/actions/workflows/python_CI.yml/badge.svg)](https://github.com/Abiyzelalem27/quantum_error_corrections/actions/workflows/python_CI.yml)
+
+[![codecov](https://codecov.io/github/Abiyzelalem27/quantum_error_corrections/graph/badge.svg)](https://codecov.io/github/Abiyzelalem27/quantum_error_corrections)
+
+
 # Quantum Error Corrections (QEC) 
 
 This repository contains a **step-by-step educational implementation** of core ideas.  

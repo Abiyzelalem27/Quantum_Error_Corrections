@@ -1,18 +1,19 @@
 
 
+
+[![CI](https://github.com/Abiyzelalem27/quantum_error_corrections/actions/workflows/python_CI.yml/badge.svg)](https://github.com/Abiyzelalem27/quantum_error_corrections/actions/workflows/python_CI.yml)
+
+[![codecov](https://codecov.io/github/Abiyzelalem27/quantum_error_corrections/graph/badge.svg)](https://codecov.io/github/Abiyzelalem27/quantum_error_corrections)
+
+
 # Quantum Error Corrections (QEC) 
 
-This repository contains a **step-by-step educational implementation** of core ideas in  
-
+This repository contains a **step-by-step educational implementation** of core ideas.  
 
 Quantum computers are very sensitive to noise (decoherence, imperfect gates).  
 QEC provides methods to **detect and correct errors** while preserving the quantum information.
 
-This repository is mainly prepared for **learning + internship portfolio** purposes.
-
-
 ## Files
-
 ### Notebooks (`notebooks/`)
 The notebooks explain and demonstrate QEC concepts in a simple way:
 

@@ -36,7 +36,112 @@ X3 = np.kron(np.kron(I,I),X)
 # Phase-flip operators
 Z1 = np.kron(np.kron(Z,I),I)   
 Z2 = np.kron(np.kron(I,Z),I)   
-Z3 = np.kron(np.kron(I,I),Z)   
+Z3 = np.kron(np.kron(I,I),Z) 
+
+
+def normalize(v):
+    return v / np.linalg.norm(v)
+
+def rho_from_state(psi):
+    return np.outer(psi, np.conjugate(psi))
+
+def fidelity_pure_vs_rho(psi, rho):
+    return float(np.real(np.vdot(psi, rho @ psi)))
+
+
+def kron(*ops):
+    """Kronecker product of many operators."""
+    out = np.array([[1]], dtype=complex)
+    for op in ops:
+        out = np.kron(out, op)
+    return out
+
+def encode_bitflip3(alpha, beta):
+    """|psi> -> alpha|000> + beta|111> (basis order |q2 q1 q0>)"""
+    psi_L = np.zeros(8, dtype=complex)
+    psi_L[0] = alpha
+    psi_L[7] = beta
+    return psi_L 
+
+# Fidelity for a pure state 
+def fidelity_pure(psi, rho_out):
+    return np.real((psi.conj().T @ rho_out @ psi)[0,0]) 
+    
+# Tensor product 
+def kron(*args):
+    result = np.array([[1]], dtype=complex)
+    for op in args:
+        result = np.kron(result, op)
+    return result
+
+#Encode 1 qubit into 3-qubit bit-flip code 
+def encode_bitflip3(alpha, beta):
+    psi = np.zeros(8, dtype=complex)
+    psi[0] = alpha
+    psi[7] = beta
+    return psi
+
+# Fidelity 
+def fidelity(psi_ref, psi_test):
+    return float(np.abs(np.vdot(psi_ref, psi_test))**2)
+
+# Apply X gate to a specific qubit 
+def X_on_qubit(i):
+    if i == 0:
+        return kron(X, I, I)
+    if i == 1:
+        return kron(I, X, I)
+    if i == 2:
+        return kron(I, I, X)
+
+#Syndrome measurement
+Z1Z2 = kron(Z, Z, I)
+Z2Z3 = kron(I, Z, Z) 
+
+def syndrome(state):
+    s1 = 1 if np.real(np.vdot(state, Z1Z2 @ state)) >= 0 else -1
+    s2 = 1 if np.real(np.vdot(state, Z2Z3 @ state)) >= 0 else -1
+    return (s1, s2)
+
+def correction_from_syndrome(s):
+    if s == (1, 1):
+        return None
+    if s == (-1, 1):
+        return 0
+    if s == (-1, -1):
+        return 1
+    if s == (1, -1):
+        return 2
+
+def correct_state(state):
+    q = correction_from_syndrome(syndrome(state))
+    return state if q is None else X_on_qubit(q) @ state
+
+#Random bit-flip channel
+def apply_random_bitflips(state, p, rng):
+    out = state.copy()
+    for q in [0, 1, 2]:
+        if rng.random() < p:
+            out = X_on_qubit(q) @ out
+    return out
+
+# Average fidelity
+def avg_fidelity_bitflip_qec(p, alpha, shots, seed):
+    rng = np.random.default_rng(seed)
+    beta = np.sqrt(1 - alpha**2)
+    psi_L = encode_bitflip3(alpha, beta)
+    Fvals = []
+    for _ in range(shots):
+        noisy = apply_random_bitflips(psi_L, p, rng)
+        corrected = correct_state(noisy)
+        Fvals.append(fidelity(psi_L, corrected))
+    return float(np.mean(Fvals))
+    
+def rho_from_state(psi):
+    return np.outer(psi, np.conjugate(psi))
+
+def fidelity_pure_vs_rho(psi, rho):
+    return float(np.real(np.vdot(psi, rho @ psi))) 
 
 def projectors(dim):
     """
